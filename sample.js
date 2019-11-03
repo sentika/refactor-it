@@ -3,79 +3,82 @@
  Выводим результаты в консоль.
  Запуск через node sample.js
  */
-var players = [
+'use strict';
+
+let players = [
     'Alexey',
     'Artur',
     'Kirill',
     'Vlad'
-]
+];
 
-'using strict';
 
 class Game {
-    constructor({p1, n2}) {
-        this.player1 = p1;
-        this.player2 = n2;
 
-        this.isPlayer1Win = undefined;
+    constructor({ player1, player2 }) {
+        this.player1 = player1;
+        this.player2 = player2;
     }
 
-play() {
-    var player1Win = Math.round(Math.random());
-    switch (player1Win) {
-        case 1:
-            this.isPlayer1Win = true;
-            console.info(this.player1, '1 - 0', this.player2);
-        case 0:
-            if (!this.isPlayer1Win) {
-                console.info(this.player1, '0 - 1', this.player2);
-            }
+    printResultOfGame(zeroOrOne) {
+        console.info(this.player1, `${zeroOrOne} - ${1 - zeroOrOne}`, this.player2);
     }
-}}
+
+    startGame() {
+        this.player1Win = Math.round(Math.random());
+        this.printResultOfGame(this.player1Win);
+    }
+}
 
 class Championship {
-    constructor(gamerzz) {
-        this.games = []
-        this._t = gamerzz;
-        this.setSchedule()
+    constructor(listOfPlayers) {
+        this.listOfAllGames = [];
+        this.listOfGamesInFirstRound = [];
+        this.listOfGamesInSecondRound = [];
+
+        this._listOfPlayers = listOfPlayers;
+
+        this.setListOfGames(this.listOfGamesInFirstRound);
+        this.setListOfGames(this.listOfGamesInSecondRound);
+
     }
 
-    setSchedule() {
-        for (var i = 0; i < this._t.length; i++) {
-            for (var j = 0; j < this._t.length; j++) {
-                if (i < j) this.games.push(new Game({p1: this._t[i], n2: this._t[j]}));
-            }
-        }
-
-        // должен быть второй круг с надписью второй круг перед его стартом, но почему-то не работает :(
-        // console.info('2nd round');
-
-        // rematches // 2nd round
-        for (var i = 0; i < this._t.length; i++) {
-            for (var j = 0; j < this._t.length; j++) {
-                if (i < j) this.games.push(new Game({p1: this._t[i], n2: this._t[j]}));
+    setListOfGames(listOfGames) {
+        for (let i = 0; i < this._listOfPlayers.length; i++) {
+            for (let j = 0; j < this._listOfPlayers.length; j++) {
+                if (i < j) {
+                    listOfGames
+                        .push(new Game({
+                            player1: this._listOfPlayers[i],
+                            player2: this._listOfPlayers[j]
+                        }));
+                }
             }
         }
     }
 
-    play() {
-        this.games.map((game) => game.play());
+    startFirstRound() {
+        console.info("1st round");
+        this.listOfGamesInFirstRound.map((game) => game.startGame());
+    }
+
+    startSecondRound() {
+        console.info("2nd round");
+        this.listOfGamesInSecondRound.map((game) => game.startGame());
+    }
+
+    startChampionship() {
+        this.startFirstRound();
+        this.startSecondRound();
+        this.listOfAllGames = this.listOfGamesInFirstRound.concat(this.listOfGamesInSecondRound);
     }
 
     getResults() {
-        return this.games.reduce((prev, current) => {
-            if (current.isPlayer1Win) {
-                return {
-                    ...prev,
-                    [current.player1]: (prev[current.player1] || 0) + 1,
-                    [current.player2]: (prev[current.player2] || 0)
-                }
-            }
-
+        return this.listOfAllGames.reduce((prev, current) => {
             return {
                 ...prev,
-                [current.player1]: (prev[current.player1] || 0),
-                [current.player2]: (prev[current.player2] || 0) + 1
+                [current.player1]: (prev[current.player1] || 0) + current.player1Win,
+                [current.player2]: (prev[current.player2] || 0) + 1 - current.player1Win
             }
         }, {})
     }
@@ -83,6 +86,6 @@ class Championship {
 
 
 const champinonship = new Championship(players);
-champinonship.play();
+champinonship.startChampionship();
 let results = champinonship.getResults();
 console.info('Results', results);
