@@ -18,7 +18,7 @@ class Game {
         this.p2 = player2;
     }
 
-    displayResult() {
+    displayResult(oneZero) {
         console.info(this.p1, `${oneZero} - ${1 - oneZero}`, this.p2);
     }
 
