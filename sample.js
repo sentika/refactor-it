@@ -3,67 +3,81 @@
  Выводим результаты в консоль.
  Запуск через node sample.js
  */
-var players = [
-    'Alexey',
-    'Artur',
-    'Kirill',
-    'Vlad'
-]
 
-'using strict';
+'use strict';
+
+let players = ['Alexey','Artur','Kirill','Vlad'];
 
 class Game {
-    constructor({p1, n2}) {
-        this.player1 = p1;
-        this.player2 = n2;
-
-        this.isPlayer1Win = undefined;
+    constructor({player1, player2}) {
+        this.player1 = player1;
+        this.player2 = player2;
     }
 
-play() {
-    var player1Win = Math.round(Math.random());
-    switch (player1Win) {
-        case 1:
-            this.isPlayer1Win = true;
-            console.info(this.player1, '1 - 0', this.player2);
-        case 0:
-            if (!this.isPlayer1Win) {
-                console.info(this.player1, '0 - 1', this.player2);
-            }
+    playGame() {
+        let player1Win = Math.round(Math.random());
+        switch (player1Win) {
+            case 1:
+                this.isPlayer1Win = true;
+                console.info(this.player1, '1 - 0', this.player2);
+            case 0:
+                if (!this.isPlayer1Win) {
+                    console.info(this.player1, '0 - 1', this.player2);
+                }
+        }
     }
-}}
+}
 
 class Championship {
-    constructor(gamerzz) {
-        this.games = []
-        this._t = gamerzz;
-        this.setSchedule()
+    constructor(players) {
+        this.players = players;
+        this.firstRound = [];
+        this.secondRound = [];
+        this.finalResults = [];
+        this.setFirstRound();
+        this.setSecondRound();
     }
 
-    setSchedule() {
-        for (var i = 0; i < this._t.length; i++) {
-            for (var j = 0; j < this._t.length; j++) {
-                if (i < j) this.games.push(new Game({p1: this._t[i], n2: this._t[j]}));
+
+    setFirstRound() {
+        for (let i = 0; i < this.players.length; i++) {
+            for (let j = 0; j < this.players.length; j++) {
+                if (i < j) {
+                    this.firstRound.push(new Game({player1: this.players[i], player2: this.players[j]}));
+                }
             }
         }
+        this.finalResults.push(...this.firstRound);
+    }
 
-        // должен быть второй круг с надписью второй круг перед его стартом, но почему-то не работает :(
-        // console.info('2nd round');
-
-        // rematches // 2nd round
-        for (var i = 0; i < this._t.length; i++) {
-            for (var j = 0; j < this._t.length; j++) {
-                if (i < j) this.games.push(new Game({p1: this._t[i], n2: this._t[j]}));
+    setSecondRound() {
+        for (let i = 0; i < this.players.length; i++) {
+            for (let j = 0; j < this.players.length; j++) {
+                if (i < j) {
+                    this.secondRound.push(new Game({player1: this.players[i], player2: this.players[j]}));
+                }
             }
         }
+        this.finalResults.push(...this.secondRound);
     }
 
-    play() {
-        this.games.map((game) => game.play());
+
+    beginChampionship() {
+        let countMatches = 0;
+        this.finalResults.map((game) => {
+            if (countMatches === 0) {
+                console.log('FIRST ROUND');
+            }
+            game.playGame()
+            countMatches++;
+            if (countMatches === this.finalResults.length/2) {
+                console.log('SECOND ROUND');
+            }
+        });
     }
 
-    getResults() {
-        return this.games.reduce((prev, current) => {
+    showResults() {
+        return this.finalResults.reduce((prev, current) => {
             if (current.isPlayer1Win) {
                 return {
                     ...prev,
@@ -83,6 +97,5 @@ class Championship {
 
 
 const champinonship = new Championship(players);
-champinonship.play();
-let results = champinonship.getResults();
-console.info('Results', results);
+champinonship.beginChampionship();
+console.info('Results', champinonship.showResults());
